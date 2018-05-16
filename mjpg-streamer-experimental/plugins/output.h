@@ -20,6 +20,10 @@
 #                                                                              #
 *******************************************************************************/
 
+#ifndef OUTPUT_H
+#define OUTPUT_H
+
+#include "../utils.h"
 #include "../mjpg_streamer.h"
 #define OUTPUT_PLUGIN_PREFIX " o: "
 #define OPRINT(...) { char _bf[1024] = {0}; snprintf(_bf, sizeof(_bf)-1, __VA_ARGS__); fprintf(stderr, "%s", OUTPUT_PLUGIN_PREFIX); fprintf(stderr, "%s", _bf); syslog(LOG_INFO, "%s", _bf); }
@@ -54,3 +58,4 @@ struct _output {
     int (*cmd)(int plugin, unsigned int control_id, unsigned int group, int value, char *value_str);
 };
 
+#endif

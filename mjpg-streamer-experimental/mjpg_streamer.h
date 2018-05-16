@@ -24,11 +24,6 @@
 #define MJPG_STREAMER_H
 #define SOURCE_VERSION "2.0"
 
-/* FIXME take a look to the output_http clients thread marked with fixme if you want to set more then 10 plugins */
-#define MAX_INPUT_PLUGINS 10
-#define MAX_OUTPUT_PLUGINS 10
-#define MAX_PLUGIN_ARGUMENTS 32
-
 #include <linux/types.h>          /* for videodev2.h */
 #include <linux/videodev2.h>
 #include <pthread.h>

@@ -36,6 +36,7 @@ endif()
 # Options
 #
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 
 add_feature_option(WXP_COMPAT "Enable compatibility with WebcamXP" OFF)
 
@@ -50,7 +51,6 @@ set (MJPG_STREAMER_PLUGIN_INSTALL_PATH "lib/mjpg-streamer")
 #
 
 find_library(JPEG_LIB jpeg)
-
 
 #
 # Input plugins
@@ -93,6 +93,29 @@ add_executable(mjpg_streamer mjpg_streamer.c
 
 target_link_libraries(mjpg_streamer pthread dl)
 install(TARGETS mjpg_streamer DESTINATION bin)
+
+
+add_library(mjpgstreamer SHARED mjpgstreamer.c utils.c)
+target_include_directories(mjpgstreamer
+    PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/plugins
+)
+target_link_libraries(mjpgstreamer pthread dl)
+install(TARGETS mjpgstreamer DESTINATION lib)
+
+
+
+
+add_executable(webcam_streamer webcam_streamer.c utils.c)
+target_include_directories(webcam_streamer
+    PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
+)
+
+target_link_libraries(webcam_streamer
+    PRIVATE mjpgstreamer)
+install(TARGETS webcam_streamer DESTINATION bin)
 
 #
 # www directory

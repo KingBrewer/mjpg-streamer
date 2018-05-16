@@ -143,3 +143,33 @@ void resolutions_help(const char * padding) {
     fprintf(stderr, "\n%sor a custom value like the following" \
     "\n%sexample: 640x480\n", padding, padding);
 }
+
+int split_parameters(char *parameter_string, int *argc, char **argv)
+{
+    int count = 1;
+    argv[0] = NULL; // the plugin may set it to 'INPUT_PLUGIN_NAME'
+    if(parameter_string != NULL && strlen(parameter_string) != 0) {
+        char *arg = NULL, *saveptr = NULL, *token = NULL;
+
+        arg = strdup(parameter_string);
+
+        if(strchr(arg, ' ') != NULL) {
+            token = strtok_r(arg, " ", &saveptr);
+            if(token != NULL) {
+                argv[count] = strdup(token);
+                count++;
+                while((token = strtok_r(NULL, " ", &saveptr)) != NULL) {
+                    argv[count] = strdup(token);
+                    count++;
+                    if(count >= MAX_PLUGIN_ARGUMENTS) {
+                        fprintf(stderr, "ERROR: too many arguments to input plugin\n");
+                        return 0;
+                    }
+                }
+            }
+        }
+        free(arg);
+    }
+    *argc = count;
+    return 1;
+}

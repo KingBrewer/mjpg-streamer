@@ -20,6 +20,9 @@
 #                                                                              #
 *******************************************************************************/
 
+#ifndef UTILS_H
+#define UTILS_H
+
 #define ABS(a) (((a) < 0) ? -(a) : (a))
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -28,6 +31,11 @@
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 #define LENGTH_OF(x) (sizeof(x)/sizeof(x[0]))
+
+/* FIXME take a look to the output_http clients thread marked with fixme if you want to set more then 10 plugins */
+#define MAX_INPUT_PLUGINS 10
+#define MAX_OUTPUT_PLUGINS 10
+#define MAX_PLUGIN_ARGUMENTS 32
 
 /******************************************************************************
 Description.: getopt must get reset, otherwise it can only be called once
@@ -128,4 +136,6 @@ void daemon_mode(void);
 
 void resolutions_help(const char * padding);
 void parse_resolution_opt(const char * optarg, int * width, int * height);
+int split_parameters(char *parameter_string, int *argc, char **argv);
 
+#endif // UTILS_H

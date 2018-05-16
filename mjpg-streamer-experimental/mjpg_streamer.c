@@ -154,35 +154,6 @@ static void signal_handler(int sig)
     return;
 }
 
-static int split_parameters(char *parameter_string, int *argc, char **argv)
-{
-    int count = 1;
-    argv[0] = NULL; // the plugin may set it to 'INPUT_PLUGIN_NAME'
-    if(parameter_string != NULL && strlen(parameter_string) != 0) {
-        char *arg = NULL, *saveptr = NULL, *token = NULL;
-
-        arg = strdup(parameter_string);
-
-        if(strchr(arg, ' ') != NULL) {
-            token = strtok_r(arg, " ", &saveptr);
-            if(token != NULL) {
-                argv[count] = strdup(token);
-                count++;
-                while((token = strtok_r(NULL, " ", &saveptr)) != NULL) {
-                    argv[count] = strdup(token);
-                    count++;
-                    if(count >= MAX_PLUGIN_ARGUMENTS) {
-                        IPRINT("ERROR: too many arguments to input plugin\n");
-                        return 0;
-                    }
-                }
-            }
-        }
-        free(arg);
-    }
-    *argc = count;
-    return 1;
-}
 
 /******************************************************************************
 Description.:
