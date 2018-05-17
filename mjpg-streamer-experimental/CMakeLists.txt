@@ -38,6 +38,11 @@ endif()
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 
+set(CMAKE_SYSROOT /mnt/rasp-pi-rootfs)
+include_directories(${CMAKE_SYSROOT}//usr/include/arm-linux-gnueabihf/)
+
+link_directories(${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf)
+
 add_feature_option(WXP_COMPAT "Enable compatibility with WebcamXP" OFF)
 
 if (WXP_COMPAT)
