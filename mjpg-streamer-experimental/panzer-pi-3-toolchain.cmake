@@ -1,0 +1,17 @@
+# this one is important
+SET(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+
+set(CMAKE_SYSROOT /mnt/rasp-pi-rootfs)
+
+set(CROSS_COMPILER_ROOT /home/vagrant/toolchain/cross-compile-tools/arm-rpi-3-linux-gnueabihf/bin)
+set(CROSS_COMPILER_PREFIX "/arm-linux-gnueabihf-")
+
+# specify the cross compiler
+SET(CMAKE_C_COMPILER ${CROSS_COMPILER_ROOT}/${CROSS_COMPILER_PREFIX}gcc)
+SET(CMAKE_CXX_COMPILER ${CROSS_COMPILER_ROOT}/${CROSS_COMPILER_PREFIX}g++)
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)

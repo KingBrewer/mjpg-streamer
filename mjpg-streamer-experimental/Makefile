@@ -12,10 +12,11 @@
 .PHONY: all clean distclean install
 	
 CMAKE_BUILD_TYPE ?= Release
+TOOLCHAIN_FILE ?= panzer-pi-zero-toolchain.cmake
 	
 all:
 	[ -d _build ] || mkdir _build
-	[ -f _build/Makefile ] || (cd _build && cmake  -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) ..)
+	[ -f _build/Makefile ] || (cd _build && cmake -DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN_FILE) -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) ..)
 	make -C _build
 	
 	@cp _build/mjpg_streamer .
