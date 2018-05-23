@@ -38,6 +38,7 @@
 #include <syslog.h>
 #include <linux/types.h>          /* for videodev2.h */
 #include <linux/videodev2.h>
+#include <stdbool.h>
 
 #include "utils.h"
 #include "mjpgstreamer.h"
@@ -45,9 +46,14 @@
 
 /* globals */
 static globals global;
+static bool streamerrunning;
 
 int run_streamer(const char* in_plugin, const char* in_plugin_params, const char* out_plugin, const char* out_plugin_params)
 {
+    openlog("MJPG-streamer ", LOG_PID | LOG_CONS, LOG_USER);
+    syslog(LOG_INFO, "starting streamer");
+
+    streamerrunning = false;
     unsigned int i = 0;
     unsigned int j = 0;
     global.incnt = 1;
@@ -82,16 +88,19 @@ int run_streamer(const char* in_plugin, const char* in_plugin_params, const char
     global.in[i].init = dlsym(global.in[i].handle, "input_init");
     if(global.in[i].init == NULL) {
         LOG("%s\n", dlerror());
+        closelog();
         return EXIT_FAILURE;
     }
     global.in[i].stop = dlsym(global.in[i].handle, "input_stop");
     if(global.in[i].stop == NULL) {
         LOG("%s\n", dlerror());
+        closelog();
         return EXIT_FAILURE;
     }
     global.in[i].run = dlsym(global.in[i].handle, "input_run");
     if(global.in[i].run == NULL) {
         LOG("%s\n", dlerror());
+        closelog();
         return EXIT_FAILURE;
     }
     /* try to find optional command */
@@ -129,16 +138,19 @@ int run_streamer(const char* in_plugin, const char* in_plugin_params, const char
     global.out[i].init = dlsym(global.out[i].handle, "output_init");
     if(global.out[i].init == NULL) {
         LOG("%s\n", dlerror());
+        closelog();
         return EXIT_FAILURE;
     }
     global.out[i].stop = dlsym(global.out[i].handle, "output_stop");
     if(global.out[i].stop == NULL) {
         LOG("%s\n", dlerror());
+        closelog();
         return EXIT_FAILURE;
     }
     global.out[i].run = dlsym(global.out[i].handle, "output_run");
     if(global.out[i].run == NULL) {
         LOG("%s\n", dlerror());
+        closelog();
         return EXIT_FAILURE;
     }
 
@@ -179,6 +191,66 @@ int run_streamer(const char* in_plugin, const char* in_plugin_params, const char
         syslog(LOG_INFO, "starting output plugin: %s (ID: %02d)", global.out[i].plugin, global.out[i].param.id);
         global.out[i].run(global.out[i].param.id);
     }
+
+    streamerrunning = true;
+
+    return 0;
+}
+
+
+int stop_streamer()
+{
+    unsigned int i = 0;
+
+    if (streamerrunning == false) {
+        return 1;
+    }
+
+    global.stop = 1;
+    usleep(1000 * 1000);
+
+    /* clean up threads */
+    LOG("force cancellation of threads and cleanup resources\n");
+    for(i = 0; i < global.incnt; i++) {
+        global.in[i].stop(i);
+    }
+
+    for(i = 0; i < global.outcnt; i++) {
+        global.out[i].stop(global.out[i].param.id);
+        pthread_cond_destroy(&global.in[i].db_update);
+        pthread_mutex_destroy(&global.in[i].db);
+    }
+    usleep(1000 * 1000);
+
+    /* close handles of input plugins */
+    for(i = 0; i < global.incnt; i++) {
+        dlclose(global.in[i].handle);
+    }
+
+    for(i = 0; i < global.outcnt; i++) {
+        int j, skip = 0;
+        DBG("about to decrement usage counter for handle of %s, id #%02d, handle: %p\n", \
+            global.out[i].plugin, global.out[i].param.id, global.out[i].handle);
+
+        for(j=i+1; j<global.outcnt; j++) {
+          if ( global.out[i].handle == global.out[j].handle ) {
+            DBG("handles are pointing to the same destination (%p == %p)\n", global.out[i].handle, global.out[j].handle);
+            skip = 1;
+          }
+        }
+        if ( skip ) {
+          continue;
+        }
+
+        DBG("closing handle %p\n", global.out[i].handle);
+
+        dlclose(global.out[i].handle);
+    }
+    DBG("all plugin handles closed\n");
+
+    LOG("done\n");
+
+    closelog();
 
     return 0;
 }

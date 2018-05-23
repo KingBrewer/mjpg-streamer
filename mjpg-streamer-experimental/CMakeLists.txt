@@ -104,7 +104,7 @@ target_include_directories(mjpgstreamer
         ${PROJECT_SOURCE_DIR}/plugins
 )
 target_link_libraries(mjpgstreamer pthread dl)
-install(TARGETS mjpgstreamer DESTINATION lib)
+install(TARGETS mjpgstreamer DESTINATION ${MJPG_STREAMER_PLUGIN_INSTALL_PATH})
 
 
 

@@ -1,24 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
-#include <sys/ioctl.h>
 #include <errno.h>
 #include <signal.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <getopt.h>
-#include <pthread.h>
-#include <dlfcn.h>
-#include <fcntl.h>
-#include <syslog.h>
-#include <linux/types.h>          /* for videodev2.h */
-#include <linux/videodev2.h>
 
 #include "utils.h"
 #include "mjpgstreamer.h"
+
+static void signal_handler(int sig)
+{
+    (void) sig;
+    stop_streamer();
+    return;
+}
 
 int main(int argc, char *argv[])
 {
@@ -31,8 +25,15 @@ int main(int argc, char *argv[])
     char *output_plugin = "output_http.so";
     char *output_params = "--port 8080";
 
-    run_streamer(input_plugin, input_params, output_plugin, output_params);
+    /* ignore SIGPIPE */
+    signal(SIGPIPE, SIG_IGN);
 
+    /* register signal handler for <CTRL>+C in order to clean up */
+    if(signal(SIGINT, signal_handler) == SIG_ERR) {
+        exit(EXIT_FAILURE);
+    }
+
+    run_streamer(input_plugin, input_params, output_plugin, output_params);
 
     /* wait for signals */
     pause();
