@@ -52,6 +52,7 @@ int run_streamer(const char* in_plugin, const char* in_plugin_params, const char
 {
     openlog("MJPG-streamer ", LOG_PID | LOG_CONS, LOG_USER);
     syslog(LOG_INFO, "starting streamer");
+    signal(SIGPIPE, SIG_IGN);
 
     streamerrunning = false;
     unsigned int i = 0;
@@ -247,9 +248,8 @@ int stop_streamer()
         dlclose(global.out[i].handle);
     }
     DBG("all plugin handles closed\n");
-
+    global.stop = 0;
     LOG("done\n");
-
     closelog();
 
     return 0;
