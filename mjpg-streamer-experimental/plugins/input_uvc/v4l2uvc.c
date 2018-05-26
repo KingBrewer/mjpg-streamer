@@ -609,6 +609,13 @@ int close_v4l2(struct vdIn *vd)
 {
     if(vd->streamingState == STREAMING_ON)
         video_disable(vd, STREAMING_OFF);
+    for(int i = 0; i < NB_BUFFER; i++)
+        munmap(vd->mem[i], vd->buf.length);
+
+    if(CLOSE_VIDEO(vd->fd) != 0) {
+        fprintf(stderr, "Problems occurred while closing %s device\n", vd->videodevice);
+    }
+
     if(vd->tmpbuffer)
         free(vd->tmpbuffer);
     vd->tmpbuffer = NULL;
